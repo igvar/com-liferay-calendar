@@ -12,14 +12,17 @@
  * details.
  */
 
-package com.liferay.calendar.internal.security.permission;
+package com.liferay.calendar.internal.security.permission.resource;
 
 import com.liferay.calendar.constants.CalendarConstants;
 import com.liferay.calendar.constants.CalendarPortletKeys;
+import com.liferay.calendar.model.CalendarResource;
+import com.liferay.calendar.service.CalendarResourceLocalService;
 import com.liferay.exportimport.kernel.staging.permission.StagingPermission;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionFactory;
 import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
-import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermissionFactory;
-import com.liferay.portal.kernel.security.permission.resource.StagedPortletPermissionLogic;
+import com.liferay.portal.kernel.security.permission.resource.StagedModelPermissionLogic;
 import com.liferay.portal.kernel.util.HashMapDictionary;
 
 import java.util.Dictionary;
@@ -35,20 +38,24 @@ import org.osgi.service.component.annotations.Reference;
  * @author Preston Crary
  */
 @Component(immediate = true)
-public class CalendarPortletPermissionRegistrar {
+public class CalendarResourceModelResourcePermissionRegistrar {
 
 	@Activate
 	public void activate(BundleContext bundleContext) {
 		Dictionary<String, Object> properties = new HashMapDictionary<>();
 
-		properties.put("resource.name", CalendarConstants.RESOURCE_NAME);
+		properties.put("model.class.name", CalendarResource.class.getName());
 
 		_serviceRegistration = bundleContext.registerService(
-			PortletResourcePermission.class,
-			PortletResourcePermissionFactory.create(
-				CalendarConstants.RESOURCE_NAME,
-				new StagedPortletPermissionLogic(
-					_stagingPermission, CalendarPortletKeys.CALENDAR)),
+			ModelResourcePermission.class,
+			ModelResourcePermissionFactory.create(
+				CalendarResource.class, CalendarResource::getCalendarResourceId,
+				_calendarResourceLocalService::getCalendarResource,
+				_portletResourcePermission,
+				(modelResourcePermission, consumer) -> consumer.accept(
+					new StagedModelPermissionLogic<>(
+						_stagingPermission, CalendarPortletKeys.CALENDAR,
+						CalendarResource::getCalendarResourceId))),
 			properties);
 	}
 
@@ -57,7 +64,15 @@ public class CalendarPortletPermissionRegistrar {
 		_serviceRegistration.unregister();
 	}
 
-	private ServiceRegistration<PortletResourcePermission> _serviceRegistration;
+	@Reference
+	private CalendarResourceLocalService _calendarResourceLocalService;
+
+	@Reference(
+		target = "(resource.name=" + CalendarConstants.RESOURCE_NAME + ")"
+	)
+	private PortletResourcePermission _portletResourcePermission;
+
+	private ServiceRegistration<ModelResourcePermission> _serviceRegistration;
 
 	@Reference
 	private StagingPermission _stagingPermission;
