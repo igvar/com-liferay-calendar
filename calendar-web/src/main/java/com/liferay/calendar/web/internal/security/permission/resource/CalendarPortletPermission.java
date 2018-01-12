@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.calendar.web.internal.security.permission;
+package com.liferay.calendar.web.internal.security.permission.resource;
 
 import com.liferay.calendar.constants.CalendarConstants;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;

@@ -12,9 +12,9 @@
  * details.
  */
 
-package com.liferay.calendar.web.internal.security.permission;
+package com.liferay.calendar.web.internal.security.permission.resource;
 
-import com.liferay.calendar.model.Calendar;
+import com.liferay.calendar.model.CalendarResource;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
@@ -26,37 +26,37 @@ import org.osgi.service.component.annotations.Reference;
  * @author Preston Crary
  */
 @Component(immediate = true)
-public class CalendarPermission {
+public class CalendarResourcePermission {
 
 	public static boolean contains(
-			PermissionChecker permissionChecker, Calendar calendar,
-			String actionId)
+			PermissionChecker permissionChecker,
+			CalendarResource calendarResource, String actionId)
 		throws PortalException {
 
-		return _calendarModelResourcePermission.contains(
-			permissionChecker, calendar, actionId);
+		return _calendarResourceModelResourcePermission.contains(
+			permissionChecker, calendarResource, actionId);
 	}
 
 	public static boolean contains(
-			PermissionChecker permissionChecker, long calendarId,
+			PermissionChecker permissionChecker, long calendarResourceId,
 			String actionId)
 		throws PortalException {
 
-		return _calendarModelResourcePermission.contains(
-			permissionChecker, calendarId, actionId);
+		return _calendarResourceModelResourcePermission.contains(
+			permissionChecker, calendarResourceId, actionId);
 	}
 
 	@Reference(
-		target = "(model.class.name=com.liferay.calendar.model.Calendar)",
+		target = "(model.class.name=com.liferay.calendar.model.CalendarResource)",
 		unbind = "-"
 	)
 	protected void setModelPermissionChecker(
-		ModelResourcePermission<Calendar> modelResourcePermission) {
+		ModelResourcePermission<CalendarResource> modelResourcePermission) {
 
-		_calendarModelResourcePermission = modelResourcePermission;
+		_calendarResourceModelResourcePermission = modelResourcePermission;
 	}
 
-	private static ModelResourcePermission<Calendar>
-		_calendarModelResourcePermission;
+	private static ModelResourcePermission<CalendarResource>
+		_calendarResourceModelResourcePermission;
 
 }
